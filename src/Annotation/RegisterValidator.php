@@ -20,12 +20,12 @@ use Lynnfly\ValidatorDispatch\Contract\ValidatorAliasInterface;
 class RegisterValidator extends AbstractAnnotation
 {
     /**
-     * @param string|null $alias 规则别名 为空时在类上使用则使用类名，在方法上使用则使用方法名
      * @param string|null $message 验证失败提示信息
+     * @param string|null $alias 规则别名 为空时在类上使用则使用类名，在方法上使用则使用方法名
      */
     public function __construct(
-        public ?string $alias = null,
         public ?string $message = null,
+        public ?string $alias = null,
     )
     {
     }
