@@ -17,6 +17,7 @@ use Lynnfly\ValidatorDispatch\Contract\ValidatorAlias;
 use Lynnfly\ValidatorDispatch\Contract\ValidatorAliasInterface;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
+use Lynnfly\HyperfDto\AbstractDataTransferObject;
 
 abstract class FormRequest extends HyperfFormRequest implements ValidatorAliasInterface
 {
