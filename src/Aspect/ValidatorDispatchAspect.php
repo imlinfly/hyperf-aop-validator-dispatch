@@ -30,34 +30,40 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
 
-class CoreMiddlewareAspect extends AbstractAspect
+class ValidatorDispatchAspect extends AbstractAspect
 {
-    public array $classes = [
-        CoreMiddleware::class . '::dispatch',
-    ];
-
-    public ?int $priority = 10000;
-
     private array $implements = [];
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(
+        private readonly ServerRequestInterface $request,
+        private readonly ContainerInterface     $container,
+    )
     {
+        $config = \Hyperf\Config\config('validator.aspect', [
+            // 验证器切面类列表
+            'classes' => [
+                'App\*\Controller\*',
+            ],
+            // 验证器切面类优先级
+            'priority' => -100,
+            // 验证器切面类注解列表
+            'annotations' => [
+            ],
+        ]);
 
+        $this->classes = $config['classes'];
+        $this->priority = $config['priority'];
+        $this->annotations = $config['annotations'];
     }
 
-    public function process(ProceedingJoinPoint $proceedingJoinPoint)
+    public function process(ProceedingJoinPoint $proceedingJoinPoint): mixed
     {
-        /** @var ServerRequestInterface $request */
-        $request = $proceedingJoinPoint->process();
-
         /** @var Dispatched $dispatched */
-        $dispatched = $request->getAttribute(Dispatched::class);
+        $dispatched = $this->request->getAttribute(Dispatched::class);
 
         if (!$dispatched instanceof Dispatched) {
             throw new ServerException(sprintf('The dispatched object is not a %s object.', Dispatched::class));
         }
-
-        Context::set(ServerRequestInterface::class, $request);
 
         if ($this->shouldHandle($dispatched)) {
             try {
@@ -85,7 +91,7 @@ class CoreMiddlewareAspect extends AbstractAspect
             }
         }
 
-        return $request;
+        return $proceedingJoinPoint->process();
     }
 
     public function isImplementedValidatesWhenResolved(string $className): bool

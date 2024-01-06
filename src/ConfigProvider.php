@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace Lynnfly\ValidatorDispatch;
 
-use Lynnfly\ValidatorDispatch\Aspect\CoreMiddlewareAspect;
+use Lynnfly\ValidatorDispatch\Aspect\ValidatorDispatchAspect;
 
 class ConfigProvider
 {
@@ -18,10 +18,18 @@ class ConfigProvider
     {
         return [
             'aspects' => [
-                CoreMiddlewareAspect::class,
+                ValidatorDispatchAspect::class,
             ],
             'listeners' => [
                 Listener\ValidatorResolvedListener::class,
+            ],
+            'publish' => [
+                [
+                    'id' => 'config',
+                    'description' => 'The config of ',
+                    'source' => __DIR__ . '/../publish/validator.php',
+                    'destination' => BASE_PATH . '/config/autoload/validator.php',
+                ],
             ],
         ];
     }

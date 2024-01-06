@@ -37,7 +37,7 @@ abstract class FormRequest extends HyperfFormRequest implements ValidatorAliasIn
      * 获取验证数据
      * @return array
      */
-    protected function validationData(): array
+    public function validationData(): array
     {
         return Context::getOrSet(__METHOD__, function () {
             return $this->formData();
@@ -63,6 +63,17 @@ abstract class FormRequest extends HyperfFormRequest implements ValidatorAliasIn
     {
         $data ??= parent::validationData();
         return FormGetter::make($data, $required);
+    }
+
+    /**
+     * 表单数据获取器
+     * @param array|null $data 表单数据
+     * @return DataGetter
+     */
+    protected function makeDataGetter(array $data = null): DataGetter
+    {
+        $data ??= parent::validationData();
+        return DataGetter::make($data);
     }
 
     public function authorize(): bool

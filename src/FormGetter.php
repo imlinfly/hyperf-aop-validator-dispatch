@@ -126,6 +126,10 @@ class FormGetter
      */
     public function set(string $name, mixed $value): static
     {
+        if ($value instanceof FormGetter) {
+            $value = $value->toArray();
+        }
+
         $this->form[$name] = $value;
         return $this;
     }
