@@ -18,6 +18,14 @@ use Hyperf\Di\Annotation\MultipleAnnotation;
 use Hyperf\Di\Aop\AbstractAspect;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
 use Hyperf\Di\ReflectionManager;
+use Hyperf\HttpServer\Annotation\AutoController;
+use Hyperf\HttpServer\Annotation\Controller;
+use Hyperf\HttpServer\Annotation\GetMapping;
+use Hyperf\HttpServer\Annotation\Mapping;
+use Hyperf\HttpServer\Annotation\PatchMapping;
+use Hyperf\HttpServer\Annotation\PostMapping;
+use Hyperf\HttpServer\Annotation\PutMapping;
+use Hyperf\HttpServer\Annotation\RequestMapping;
 use Hyperf\HttpServer\CoreMiddleware;
 use Hyperf\HttpServer\Router\Dispatched;
 use Hyperf\Server\Exception\ServerException;
@@ -25,6 +33,7 @@ use Hyperf\Validation\Annotation\Scene;
 use Hyperf\Validation\Contract\ValidatesWhenResolved;
 use Hyperf\Validation\Request\FormRequest;
 use Hyperf\Validation\UnauthorizedException;
+use Lynnfly\ValidatorDispatch\Annotation\Valid;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -34,26 +43,30 @@ class ValidatorDispatchAspect extends AbstractAspect
 {
     private array $implements = [];
 
+    public array $classes = [
+        'App\*\Controller\*',
+        'App\Controller\*',
+    ];
+
+    public array $annotations = [
+        Controller::class,
+        AutoController::class,
+        GetMapping::class,
+        Mapping::class,
+        PatchMapping::class,
+        PostMapping::class,
+        PutMapping::class,
+        RequestMapping::class,
+        Valid::class,
+    ];
+
+    public ?int $priority = -100;
+
     public function __construct(
         private readonly ServerRequestInterface $request,
         private readonly ContainerInterface     $container,
     )
     {
-        $config = \Hyperf\Config\config('validator.aspect', [
-            // 验证器切面类列表
-            'classes' => [
-                'App\*\Controller\*',
-            ],
-            // 验证器切面类优先级
-            'priority' => -100,
-            // 验证器切面类注解列表
-            'annotations' => [
-            ],
-        ]);
-
-        $this->classes = $config['classes'];
-        $this->priority = $config['priority'];
-        $this->annotations = $config['annotations'];
     }
 
     public function process(ProceedingJoinPoint $proceedingJoinPoint): mixed

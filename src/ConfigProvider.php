@@ -23,14 +23,6 @@ class ConfigProvider
             'listeners' => [
                 Listener\ValidatorResolvedListener::class,
             ],
-            'publish' => [
-                [
-                    'id' => 'config',
-                    'description' => 'The config of ',
-                    'source' => __DIR__ . '/../publish/validator.php',
-                    'destination' => BASE_PATH . '/config/autoload/validator.php',
-                ],
-            ],
         ];
     }
 }
