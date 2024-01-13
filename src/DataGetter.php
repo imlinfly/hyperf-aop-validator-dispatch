@@ -12,6 +12,12 @@ namespace Lynnfly\ValidatorDispatch;
 
 class DataGetter
 {
+    /**
+     * 空值返回默认值，如果获取到的值为字符串空值，则返回默认值
+     * @var bool
+     */
+    public bool $emptyReturnDefault = true;
+
     public function __construct(
         protected array $data = [],
     )
@@ -179,7 +185,8 @@ class DataGetter
     {
         $value = $this->getValue($key, $default);
 
-        if ($value === $default) {
+        // 如果值为默认值或者不是字符串类型且值为空，则直接返回默认值
+        if ($value === $default || ($this->emptyReturnDefault && $type !== 'string' && $value === '')) {
             return $value;
         }
 
@@ -213,5 +220,25 @@ class DataGetter
         }
 
         return $value;
+    }
+
+    /**
+     * 获取空值返回默认值
+     * @return bool
+     */
+    public function isEmptyReturnDefault(): bool
+    {
+        return $this->emptyReturnDefault;
+    }
+
+    /**
+     * 设置空值返回默认值
+     * @param bool $emptyReturnDefault
+     * @return $this
+     */
+    public function setEmptyReturnDefault(bool $emptyReturnDefault): static
+    {
+        $this->emptyReturnDefault = $emptyReturnDefault;
+        return $this;
     }
 }
