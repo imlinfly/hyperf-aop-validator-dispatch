@@ -187,7 +187,7 @@ class DataGetter
 
         // 如果值为默认值或者不是字符串类型且值为空，则直接返回默认值
         if ($value === $default || ($this->emptyReturnDefault && $type !== 'string' && $value === '')) {
-            return $value;
+            return $default;
         }
 
         $value = match ($type) {
