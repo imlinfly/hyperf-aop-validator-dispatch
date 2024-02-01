@@ -40,7 +40,7 @@ class DataGetter
     public function string(string $key, ?string $default = '', string $filter = '', bool $trim = false): ?string
     {
         if ($trim) {
-            $filter = 'trim|' . $filter;
+            $filter = $filter ? 'trim|' . $filter : 'trim';
         }
 
         return $this->getTypedValue('string', $key, $default, $filter);
@@ -216,7 +216,10 @@ class DataGetter
     public function filterValue(mixed $value = null, string $filter = ''): mixed
     {
         if ($filter) {
-            $value = filter_var($value, FILTER_CALLBACK, ['options' => $filter]);
+            $filter = explode('|', $filter);
+            foreach ($filter as $name) {
+                $value = $name($value);
+            }
         }
 
         return $value;

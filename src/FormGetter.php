@@ -92,33 +92,6 @@ class FormGetter
     }
 
     /**
-     * 过滤字符串
-     * @param string $value 要过滤的值
-     * @param string $filter 过滤器
-     * @return string
-     */
-    protected function filter(string $value, string $filter = ''): string
-    {
-        if ($filter === '') {
-            return $value;
-        }
-
-        $filters = explode('|', $filter);
-
-        foreach ($filters as $filter) {
-            $filter = trim($filter);
-
-            if ($filter === '') {
-                continue;
-            }
-
-            $value = (string)$filter($value);
-        }
-
-        return $value;
-    }
-
-    /**
      * 赋值表单数据
      * @param string $name
      * @param mixed $value
@@ -139,7 +112,6 @@ class FormGetter
      * @param string $name 参数名
      * @param string $default 默认值
      * @param bool $required 是否必须
-     * @param string $filter 过滤器
      * @param bool $trim 是否去除两边空格
      * @return $this
      */
@@ -147,15 +119,10 @@ class FormGetter
         string $name,
         string $default = '',
         bool   $required = false,
-        string $filter = '',
         bool   $trim = false,
     ): static
     {
-        if ($trim) {
-            $filter = 'trim|' . $filter;
-        }
-
-        $this->rules[] = ['string', [$name, $default, $required, $filter]];
+        $this->rules[] = ['string', [$name, $default, $required, $trim]];
         return $this;
     }
 
