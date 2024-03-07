@@ -16,6 +16,7 @@ use Hyperf\Context\Context;
 use Hyperf\Di\Annotation\AnnotationCollector;
 use Hyperf\Di\Annotation\MultipleAnnotation;
 use Hyperf\Di\Aop\AbstractAspect;
+use Hyperf\Di\Aop\AnnotationMetadata;
 use Hyperf\Di\Aop\ProceedingJoinPoint;
 use Hyperf\Di\ReflectionManager;
 use Hyperf\HttpServer\Annotation\AutoController;
@@ -33,6 +34,7 @@ use Hyperf\Validation\Annotation\Scene;
 use Hyperf\Validation\Contract\ValidatesWhenResolved;
 use Hyperf\Validation\Request\FormRequest;
 use Hyperf\Validation\UnauthorizedException;
+use Lynnfly\ValidatorDispatch\Annotation\IgnoreValidator;
 use Lynnfly\ValidatorDispatch\Annotation\Valid;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -71,6 +73,16 @@ class ValidatorDispatchAspect extends AbstractAspect
 
     public function process(ProceedingJoinPoint $proceedingJoinPoint): mixed
     {
+        // If the request is not a HTTP request, then skip the validation.
+        if (!Context::has(ServerRequestInterface::class)) {
+            return $proceedingJoinPoint->process();
+        }
+
+        // If the class or method is annotated with @IgnoreValidator, then skip the validation.
+        if ($this->isIgnore($proceedingJoinPoint->getAnnotationMetadata())) {
+            return $proceedingJoinPoint->process();
+        }
+
         /** @var Dispatched $dispatched */
         $dispatched = $this->request->getAttribute(Dispatched::class);
 
@@ -171,5 +183,10 @@ class ValidatorDispatchAspect extends AbstractAspect
             return $handler;
         }
         throw new RuntimeException('Handler not exist.');
+    }
+
+    public function isIgnore(AnnotationMetadata $annotation): bool
+    {
+        return isset($annotation->class[IgnoreValidator::class]) || isset($annotation->method[IgnoreValidator::class]);
     }
 }
