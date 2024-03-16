@@ -39,10 +39,20 @@ class FormGetter
      * @param string $name
      * @return $this
      */
-    public function child(string $name): static
+    public function child(string $name, callable $callback = null, bool $required = false): static
     {
-        $that = clone $this;
-        $that->data = $this->data[$name] ?? [];
+        $that = new static($this->data[$name] ?? [], $required);
+
+        if ($callback) {
+
+            if (isset($this->data[$name]) || $required) {
+                $callback($that);
+                $this->set($name, $that);
+            }
+
+            return $this;
+        }
+
         return $that;
     }
 
