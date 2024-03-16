@@ -37,6 +37,8 @@ class FormGetter
     /**
      * 子级数据
      * @param string $name
+     * @param callable|null $callback
+     * @param bool $required
      * @return $this
      */
     public function child(string $name, callable $callback = null, bool $required = false): static
