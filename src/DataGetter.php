@@ -37,7 +37,7 @@ class DataGetter
      * @param bool $trim
      * @return string|null
      */
-    public function string(string $key, ?string $default = '', string $filter = '', bool $trim = false): ?string
+    public function string(string $key, ?string $default = '', string $filter = '', bool $trim = true): ?string
     {
         if ($trim) {
             $filter = $filter ? 'trim|' . $filter : 'trim';
@@ -53,7 +53,7 @@ class DataGetter
      * @param bool $trim
      * @return string|null
      */
-    public function stringOrNull(string $key, string $filter = '', bool $trim = false): ?string
+    public function stringOrNull(string $key, string $filter = '', bool $trim = true): ?string
     {
         return $this->string($key, null, $filter, $trim);
     }
