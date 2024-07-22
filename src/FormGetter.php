@@ -131,7 +131,7 @@ class FormGetter
         string $name,
         string $default = '',
         bool   $required = false,
-        bool   $trim = false,
+        bool   $trim = true,
     ): static
     {
         $this->rules[] = ['string', [$name, $default, $required, $trim]];
