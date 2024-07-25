@@ -221,4 +221,9 @@ class FormGetter
         $this->required = $required;
         return $this;
     }
+
+    public function getData(): array
+    {
+        return $this->data;
+    }
 }

@@ -244,4 +244,9 @@ class DataGetter
         $this->emptyReturnDefault = $emptyReturnDefault;
         return $this;
     }
+
+    public function getData(): array
+    {
+        return $this->data;
+    }
 }
