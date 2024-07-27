@@ -11,6 +11,7 @@ declare (strict_types=1);
 namespace Lynnfly\ValidatorDispatch;
 
 use Hyperf\Context\Context;
+use Hyperf\HttpServer\Router\Dispatched;
 use Hyperf\Validation\Request\FormRequest as HyperfFormRequest;
 use InvalidArgumentException;
 use Lynnfly\ValidatorDispatch\Contract\ValidatorAlias;
@@ -46,12 +47,12 @@ abstract class FormRequest extends HyperfFormRequest implements ValidatorAliasIn
      */
     public function validationData(): array
     {
-        $scene = $this->getScene();
-        $key = __METHOD__ . '.' . ($scene ?? 'default');
+        $action = $this->getAction();
+        $key = __METHOD__ . '.' . ($action ?? 'default');
 
         return Context::getOrSet($key, fn() => array_merge(
             $this->callValidatorMethod('', 'formData'),
-            $this->callValidatorMethod($scene, 'formData')
+            $this->callValidatorMethod($action, 'FormData')
         ));
     }
 
@@ -71,8 +72,8 @@ abstract class FormRequest extends HyperfFormRequest implements ValidatorAliasIn
     public function messages(): array
     {
         return array_merge(
-            $this->callValidatorMethod('common', 'messages'),
-            $this->callValidatorMethod($this->getScene(), 'messages')
+            $this->callValidatorMethod('common', 'Messages'),
+            $this->callValidatorMethod($this->getAction(), 'Messages')
         );
     }
 
@@ -83,8 +84,8 @@ abstract class FormRequest extends HyperfFormRequest implements ValidatorAliasIn
     public function attributes(): array
     {
         return array_merge(
-            $this->callValidatorMethod('common', 'attributes'),
-            $this->callValidatorMethod($this->getScene(), 'attributes')
+            $this->callValidatorMethod('common', 'Attributes'),
+            $this->callValidatorMethod($this->getAction(), 'Attributes')
         );
     }
 
@@ -95,30 +96,54 @@ abstract class FormRequest extends HyperfFormRequest implements ValidatorAliasIn
     public function rules(): array
     {
         return array_merge(
-            $this->callValidatorMethod('common', 'rules'),
-            $this->callValidatorMethod($this->getScene(), 'rules')
+            $this->callValidatorMethod('common', 'Rules'),
+            $this->callValidatorMethod($this->getAction(), 'Rules')
         );
     }
 
     /**
      * 调用验证器方法
      * @param string|null $prefix 前缀
-     * @param string $function 方法名
+     * @param string $method 方法名
      * @return array
      */
-    protected function callValidatorMethod(?string $prefix, string $function): array
+    protected function callValidatorMethod(?string $prefix, string $method): array
     {
         if (is_null($prefix)) {
             return [];
         }
 
-        if ($prefix === '') {
-            $method = $function;
-        } else {
-            $method = $prefix . ucfirst($function);
-        }
+        $method = $prefix . $method;
 
         return method_exists($this, $method) ? call_user_func([$this, $method]) : [];
+    }
+
+    /**
+     * 获取当前请求的动作
+     * @return string|null
+     */
+    protected function getAction(): ?string
+    {
+        return $this->getScene() ?: Context::getOrSet('request_action', function () {
+            /**
+             * @var Dispatched $dispatch
+             */
+            $dispatch = $this->getAttribute(Dispatched::class);
+            $callback = $dispatch?->handler?->callback;
+            if (is_array($callback) && count($callback) === 2) {
+                return $callback[1];
+            }
+            if (is_string($callback)) {
+                if (str_contains($callback, '@')) {
+                    return explode('@', $callback)[1] ?? null;
+                }
+                if (str_contains($callback, '::')) {
+                    return explode('::', $callback)[1] ?? null;
+                }
+            }
+
+            return null;
+        });
     }
 
     /**
